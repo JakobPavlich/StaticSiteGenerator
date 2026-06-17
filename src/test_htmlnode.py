@@ -1,5 +1,5 @@
 import unittest
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 
 class TestHTMLNode(unittest.TestCase):
@@ -33,6 +33,50 @@ class TestHTMLNode(unittest.TestCase):
         node = HTMLNode("p", "Hello")
         with self.assertRaises(NotImplementedError):
             node.to_html()
+
+    def test_leaf_to_html_p(self):
+        node = LeafNode("p", "Hello, world!")
+        self.assertEqual(node.to_html(), "<p>Hello, world!</p>")
+
+    def test_leaf_to_html_b(self):
+        node = LeafNode("b", "this should be bold")
+        self.assertEqual(node.to_html(), "<b>this should be bold</b>")
+
+    def test_leaf_to_html_a(self):
+        node = LeafNode("a", "this might be a link", {
+                        "href": "https://www.spletnastran.si"})
+        self.assertEqual(
+            node.to_html(), '<a href="https://www.spletnastran.si">this might be a link</a>')
+
+    def test_to_html_with_children(self):
+        child_node = LeafNode("span", "child")
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(parent_node.to_html(),
+                         "<div><span>child</span></div>")
+
+    def test_to_html_with_multiple_children(self):
+        first_child = LeafNode("b", "The firstborn child")
+        second_child = LeafNode(None, " and the second one")
+        third_child = LeafNode("i", " and another.")
+        parent_node = ParentNode(
+            "div", [first_child, second_child, third_child])
+
+        self.assertEqual(parent_node.to_html(),
+                         "<div><b>The firstborn child</b> and the second one<i> and another.</i></div>")
+
+    def test_to_html_with_grandchildren(self):
+        grandchild_node = LeafNode("b", "grandchild")
+        child_node = ParentNode("span", [grandchild_node])
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(
+            parent_node.to_html(),
+            "<div><span><b>grandchild</b></span></div>",
+        )
+
+    def test_to_html_with_no_children(self):
+        parent_node = ParentNode("p", [])
+        with self.assertRaises(ValueError):
+            parent_node.to_html()
 
 
 if __name__ == "__main__":
