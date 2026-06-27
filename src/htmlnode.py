@@ -43,6 +43,8 @@ class LeafNode(HTMLNode):
         else:
             if self.tag == "img":
                 return f'<img{self.props_to_html()}>'
+            elif self.tag == "code":
+                return f'<pre><{self.tag}{self.props_to_html()}>{self.value}</{self.tag}></pre>'
             else:
                 return f'<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>'
 
@@ -83,7 +85,7 @@ class ParentNode(HTMLNode):
         return f"ParentNode({self.tag}, children: {self.children}, {self.props})"
 
     def __eq__(self, other):
-        if not isinstance(other, LeafNode):
+        if not isinstance(other, ParentNode):
             return False
         return (
             self.tag == other.tag

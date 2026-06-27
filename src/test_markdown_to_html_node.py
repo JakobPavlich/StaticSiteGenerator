@@ -2,11 +2,59 @@ import unittest
 from markdown_to_html_node import markdown_to_html_node, get_blocks, md_heading_to_htmlnode
 from markdown_to_html_node import md_quote_to_htmlnode, md_ul_to_ul, md_ol_to_ol
 from markdown_to_html_node import md_code_to_htmlnode, try_code
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 from textnode import TextNode, text_node_to_html_node, TextType
+from markdown_to_html_node import text_to_children
 
 
 class TestMarkdownToHTMLNode(unittest.TestCase):
+    def test_paragraphs(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
+        )
+
+    #     def test_codeblock(self):
+    #         md = """
+    # ```
+    # This is text that _should_ remain
+    # the **same** even with inline stuff
+    # ```
+    # """
+    #
+    #         node = markdown_to_html_node(md)
+    #         html = node.to_html()
+    #         self.assertEqual(
+    #             html,
+    #             "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
+    #         )
+
+    def test_text_to_children_one(self):
+        text = "This is a text with a **bold** word."
+        children = [LeafNode(None, "This is a text with a ", None),
+                    LeafNode("b", "bold", None),
+                    LeafNode(None, " word.", None)]
+        self.assertEqual(text_to_children(text), children)
+
+    def test_text_to_children_two(self):
+        text = "This is a text with a **bold** and an _italics_ word."
+        children = [LeafNode(None, "This is a text with a ", None),
+                    LeafNode("b", "bold", None),
+                    LeafNode(None, " and an ", None),
+                    LeafNode("i", "italics"),
+                    LeafNode(None, " word.", None)]
+        self.assertEqual(text_to_children(text), children)
 
     def test_code_1(self):
         code = """```
@@ -64,24 +112,29 @@ small example"""
         md_quote = """>Hopefully
 > this will be
 >a quote"""
-        html_quote = """Hopefully
-this will be
-a quote"""
-        self.assertEqual(md_quote_to_htmlnode(md_quote), html_quote)
+        children = [LeafNode(None, "Hopefully\nthis will be\na quote")]
+        self.assertEqual(md_quote_to_htmlnode(md_quote), children)
 
     def test_ul(self):
         md_ul = """- this
 - might be
 - an unordered list"""
-        html_ul = "<li>this</li><li>might be</li><li>an unordered list</li>"
-        self.assertEqual(md_ul_to_ul(md_ul), html_ul)
+        # html_ul = "<li>this</li><li>might be</li><li>an unordered list</li>"
+        node = [ParentNode("li", [LeafNode(None, "this", None)]),
+                ParentNode("li", [LeafNode(None, "might be", None)]),
+                ParentNode("li", [LeafNode(None, "an unordered list", None)])
+                ]
+        self.assertEqual(md_ul_to_ul(md_ul), node)
 
     def test_ol(self):
         md_ul = """1. this
 2. might be
 3. an ordered list"""
-        html_ul = "<li>this</li><li>might be</li><li>an ordered list</li>"
-        self.assertEqual(md_ol_to_ol(md_ul), html_ul)
+        node = [ParentNode("li", [LeafNode(None, "this", None)]),
+                ParentNode("li", [LeafNode(None, "might be", None)]),
+                ParentNode("li", [LeafNode(None, "an ordered list", None)])
+                ]
+        self.assertEqual(md_ol_to_ol(md_ul), node)
 
 
 class TestMarkdownToBlocks(unittest.TestCase):

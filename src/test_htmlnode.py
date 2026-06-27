@@ -48,6 +48,18 @@ class TestHTMLNode(unittest.TestCase):
         self.assertEqual(
             node.to_html(), '<a href="https://www.spletnastran.si">this might be a link</a>')
 
+    def test_leaf_to_html_code(self):
+        code_text = """
+def is_code?(self):
+ask = 'Is this a code block and will it work?'
+return 'Who knows?'"""
+        node = LeafNode("code", code_text)
+        html = """<pre><code>
+def is_code?(self):
+ask = 'Is this a code block and will it work?'
+return 'Who knows?'</code></pre>"""
+        self.assertEqual(node.to_html(), html)
+
     def test_to_html_with_children(self):
         child_node = LeafNode("span", "child")
         parent_node = ParentNode("div", [child_node])

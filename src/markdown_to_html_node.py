@@ -1,14 +1,19 @@
 from markdown_to_blocks import markdown_to_blocks
 from markdown_to_blocks import block_to_block_type, BlockType
 from textnode import TextNode, text_node_to_html_node, TextType
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, ParentNode, LeafNode
 import re
+from text_to_html import text_to_textnodes
 
 
 def markdown_to_html_node(markdown):
+    children = []
     blocks = get_blocks(markdown)
     for block in blocks:
-        block_to_html_node(block)
+        children.append(block_to_html_node(block))
+
+    parent = ParentNode("div", children)
+    return parent
 
 
 def get_blocks(markdown):
@@ -19,23 +24,31 @@ def block_to_html_node(block):
     block_type = block_to_block_type(block)
     if block_type == BlockType.P:
         block.replace("\n", " ")
-        return HTMLNode("p", block, text_to_children(block))
+        return ParentNode("p", text_to_children(block))
     elif block_type == BlockType.H:
         tag, text = md_heading_to_htmlnode(block)
-        return HTMLNode(tag, text, text_to_children(block))
+        return ParentNode(tag, text_to_children(block))
     elif block_type == BlockType.QUOTE:
-        text = md_quote_to_htmlnode(block)
-        return HTMLNode("blockquote", text, text_to_children(block))
+        children = md_quote_to_htmlnode(block)
+        return ParentNode("blockquote", children)
     elif block_type == BlockType.UL:
-        text = md_ul_to_ul(block)
-        return HTMLNode("ul", text, text_to_children(block))
+        children = md_ul_to_ul(block)
+        return ParentNode("ul", children)
     elif block_type == BlockType.OL:
-        text = md_ol_to_ol(block)
-        return HTMLNode("ol", text, text_to_children(block))
+        children = md_ol_to_ol(block)
+        return ParentNode("ol", children)
     # še za CODE, potem pa verjetno text_to_childre.
     elif block_type == BlockType.CODE:
         return md_code_to_htmlnode(block)
-    # še <pre>
+    # še <pre> -- mislim, da zdaj dela.
+
+
+def text_to_children(text):
+    html_nodes: list[HTMLNode] = []
+    text_nodes = text_to_textnodes(text)
+    for text_node in text_nodes:
+        html_nodes.append(text_node_to_html_node(text_node))
+    return html_nodes
 
 
 def try_code(markdown):
@@ -50,24 +63,27 @@ def md_code_to_htmlnode(markdown):
     text = match[0]
     text_node = TextNode(text, TextType.CODE)
     return text_node_to_html_node(text_node)
-    # še <pre>
 
 
 def md_ol_to_ol(markdown):
     md_ol = markdown.split("\n")
-    list_items_string = ""
+    li_items_list = []
     for item_text in md_ol:
         item = re.findall(r"\d+\. (.*)", item_text)
-        list_items_string += f"<li>{item[0]}</li>"
-    return list_items_string
+        # list_items_string += f"<li>{item[0]}</li>"
+        li = ParentNode("li", text_to_children(item[0]))
+        li_items_list.append(li)
+    return li_items_list
 
 
 def md_ul_to_ul(markdown):
     md_ul = markdown.split("\n")
-    list_items_string = ""
+    li_items_list = []
     for item_text in md_ul:
-        list_items_string += f"<li>{item_text[2:]}</li>"
-    return list_items_string
+        # list_items_string += f"<li>{item_text[2:]}</li>"
+        li = ParentNode("li", text_to_children(item_text[2:]))
+        li_items_list.append(li)
+    return li_items_list
 
 
 def md_heading_to_htmlnode(md_heading):
@@ -94,8 +110,4 @@ def md_quote_to_htmlnode(quote):
             plain_quote.append(line[1:])
     plain_quote = "\n".join(plain_quote)
 
-    return plain_quote
-
-
-def text_to_children(text):
-    pass
+    return text_to_children(plain_quote)
