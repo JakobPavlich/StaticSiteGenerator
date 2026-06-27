@@ -54,10 +54,10 @@ def is_code?(self):
 ask = 'Is this a code block and will it work?'
 return 'Who knows?'"""
         node = LeafNode("code", code_text)
-        html = """<pre><code>
+        html = """<code>
 def is_code?(self):
 ask = 'Is this a code block and will it work?'
-return 'Who knows?'</code></pre>"""
+return 'Who knows?'</code>"""
         self.assertEqual(node.to_html(), html)
 
     def test_to_html_with_children(self):

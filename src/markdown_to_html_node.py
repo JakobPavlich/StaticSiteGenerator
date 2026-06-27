@@ -23,8 +23,8 @@ def get_blocks(markdown):
 def block_to_html_node(block):
     block_type = block_to_block_type(block)
     if block_type == BlockType.P:
-        block.replace("\n", " ")
-        return ParentNode("p", text_to_children(block))
+        paragraph = block.replace("\n", " ")
+        return ParentNode("p", text_to_children(paragraph))
     elif block_type == BlockType.H:
         tag, text = md_heading_to_htmlnode(block)
         return ParentNode(tag, text_to_children(block))
@@ -59,10 +59,10 @@ def try_code(markdown):
 
 def md_code_to_htmlnode(markdown):
 
-    match = re.findall(r"^```(\n[\s\S]*?)```$", markdown)
+    match = re.findall(r"^```\n([\s\S]*?)```$", markdown)
     text = match[0]
-    text_node = TextNode(text, TextType.CODE)
-    return text_node_to_html_node(text_node)
+    text_node = TextNode(text, TextType.TEXT)
+    return ParentNode("pre", [ParentNode("code", [text_node_to_html_node(text_node)])])
 
 
 def md_ol_to_ol(markdown):

@@ -25,20 +25,20 @@ This is another paragraph with _italic_ text and `code` here
             "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
         )
 
-    #     def test_codeblock(self):
-    #         md = """
-    # ```
-    # This is text that _should_ remain
-    # the **same** even with inline stuff
-    # ```
-    # """
-    #
-    #         node = markdown_to_html_node(md)
-    #         html = node.to_html()
-    #         self.assertEqual(
-    #             html,
-    #             "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
-    #         )
+    def test_codeblock(self):
+        md = """
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
+        )
 
     def test_text_to_children_one(self):
         text = "This is a text with a **bold** word."
@@ -61,22 +61,23 @@ This is another paragraph with _italic_ text and `code` here
 def is_code?(self):
     ask = 'Is this a code block and will it work?'
     return 'Who knows?'```"""
-        output = """
-def is_code?(self):
+        output = """def is_code?(self):
     ask = 'Is this a code block and will it work?'
     return 'Who knows?'"""
 
-        self.assertEqual(md_code_to_htmlnode(code), LeafNode("code", output))
+        self.assertEqual(md_code_to_htmlnode(code), ParentNode(
+            "pre", [ParentNode("code", [LeafNode(None, output)])]))
 
     def test_code_simpler(self):
         simple_code = """```
 example```"""
-        output_text = """
-example"""
-        output_node = text_node_to_html_node(
-            TextNode(output_text, TextType.CODE))
-        self.assertEqual(md_code_to_htmlnode(
-            simple_code), output_node)
+        output_text = """example"""
+        # output_node = text_node_to_html_node(
+        #     TextNode(output_text, TextType.CODE))
+        # self.assertEqual(md_code_to_htmlnode(
+        #     simple_code), output_node)
+        self.assertEqual(md_code_to_htmlnode(simple_code), ParentNode(
+            "pre", [ParentNode("code", [LeafNode(None, output_text)])]))
 
     def test_code_text(self):
 
