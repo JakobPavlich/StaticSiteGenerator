@@ -27,7 +27,7 @@ def block_to_html_node(block):
         return ParentNode("p", text_to_children(paragraph))
     elif block_type == BlockType.H:
         tag, text = md_heading_to_htmlnode(block)
-        return ParentNode(tag, text_to_children(block))
+        return ParentNode(tag, text_to_children(text))
     elif block_type == BlockType.QUOTE:
         children = md_quote_to_htmlnode(block)
         return ParentNode("blockquote", children)
@@ -61,8 +61,10 @@ def md_code_to_htmlnode(markdown):
 
     match = re.findall(r"^```\n([\s\S]*?)```$", markdown)
     text = match[0]
-    text_node = TextNode(text, TextType.TEXT)
-    return ParentNode("pre", [ParentNode("code", [text_node_to_html_node(text_node)])])
+    # text_node = TextNode(text, TextType.TEXT)
+    return ParentNode("pre", [LeafNode("code", text)])
+    # mogoče bodo še problemi tu - prej je bilo
+    # ParentNode("code", text_node_to_html_node(text_node))
 
 
 def md_ol_to_ol(markdown):
@@ -87,13 +89,20 @@ def md_ul_to_ul(markdown):
 
 
 def md_heading_to_htmlnode(md_heading):
-    html_heading = ""
-    for i in range(1, 7):
-        if re.match(fr"^#{{{i}}} +", md_heading):
-            text = md_heading[(i+1):]
-            html_heading = f"<h{i}>{text}</h{i}>"
-            tag = f"h{i}"
-    if not html_heading:
+    # for i in range(1, 7):
+    #     if re.match(fr"^#{{{i}}} +", md_heading):
+    #         text = md_heading[(i+1):]
+    #         tag = f"h{i}"
+
+    level = 0
+    for char in md_heading:
+        if char == "#":
+            level += 1
+        else:
+            break
+    text = md_heading[level:].strip()
+    tag = f"h{level}"
+    if level == 0:
         raise ValueError("Not a valid markdown heading.")
     return tag, text
     # return HTMLNode(f"h{i}", text, text_to_children(md_heading))

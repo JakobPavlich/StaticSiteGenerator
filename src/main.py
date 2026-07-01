@@ -2,6 +2,7 @@
 from copy_directory import copy_directory
 import os
 import shutil
+from webpage_functions import generate_page
 
 
 def main():
@@ -14,6 +15,7 @@ def main():
         shutil.rmtree(public_path)
     os.mkdir(public_path)
     copy_directory(source_path, destination_path)
+    generate_page("content/index.md", "template.html", "public/index.html")
 
 
 main()

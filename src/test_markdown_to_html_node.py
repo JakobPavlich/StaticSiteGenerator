@@ -66,7 +66,7 @@ def is_code?(self):
     return 'Who knows?'"""
 
         self.assertEqual(md_code_to_htmlnode(code), ParentNode(
-            "pre", [ParentNode("code", [LeafNode(None, output)])]))
+            "pre", [LeafNode("code", output)]))
 
     def test_code_simpler(self):
         simple_code = """```
@@ -77,7 +77,7 @@ example```"""
         # self.assertEqual(md_code_to_htmlnode(
         #     simple_code), output_node)
         self.assertEqual(md_code_to_htmlnode(simple_code), ParentNode(
-            "pre", [ParentNode("code", [LeafNode(None, output_text)])]))
+            "pre", [LeafNode("code", output_text)]))
 
     def test_code_text(self):
 
